@@ -30,8 +30,11 @@ app.get("/", (req, res) => {
 // ##############     Routes   #######################
 
 import userRouter from "./routes/user.routes.js";
+import educatorRouter from "./routes/educator.routes.js"
+
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/educator", educatorRouter);
 
 
 
