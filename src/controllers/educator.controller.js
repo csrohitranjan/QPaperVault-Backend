@@ -57,3 +57,25 @@ export const uploadQuestionPaper = async (req, res) => {
         });
     }
 };
+
+
+export const getPendingQuestionPapers = async (req, res) => {
+    try {
+        const pendingPapers = await QuestionPaper.find({ status: "pending" })
+            .populate("uploadedBy", "fullName email role")
+            .sort({ createdAt: 1 }); // ascending: oldest first
+
+        return res.status(200).json({
+            status: 200,
+            message: "Pending question papers fetched successfully.",
+            pendingPapers,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Failed to fetch pending question papers.",
+            error: error.message,
+        });
+    }
+};
+
