@@ -27,9 +27,8 @@ export const uploadQuestionPaper = async (req, res) => {
         }
 
         // Determine approval status based on user role
-        const isEducator = user.role === "educator";
+        const isAuthorizedUser = user.role === "educator" || user.role === "admin";
 
-        console.log(isEducator)
         const uploadedPaper = await QuestionPaper.create({
             paperName,
             paperCode,
@@ -39,8 +38,8 @@ export const uploadQuestionPaper = async (req, res) => {
             year,
             fileUrl: uploadResult.secure_url,
             uploadedBy: user._id,
-            approvedBy: isEducator ? user._id : null,
-            status: isEducator ? "approved" : "pending",
+            approvedBy: isAuthorizedUser ? user._id : null,
+            status: isAuthorizedUser ? "approved" : "pending",
         });
 
         return res.status(200).json({
@@ -74,6 +73,76 @@ export const getPendingQuestionPapers = async (req, res) => {
         return res.status(500).json({
             status: 500,
             message: "Failed to fetch pending question papers.",
+            error: error.message,
+        });
+    }
+};
+
+
+export const approveQuestionPaper = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id: questionPaperId } = req.params;
+
+        if (!questionPaperId) {
+            return res.status(400).json({
+                status: 400,
+                message: "Question paper ID is required in params.",
+            });
+        }
+
+        const paper = await QuestionPaper.findById(questionPaperId);
+
+        if (!paper) {
+            return res.status(404).json({
+                status: 404,
+                message: "Question paper not found.",
+            });
+        }
+
+        if (paper.status !== "pending") {
+            return res.status(400).json({
+                status: 400,
+                message: "This question paper is already reviewed.",
+            });
+        }
+
+        paper.status = "approved";
+        paper.approvedBy = user._id;
+
+        await paper.save();
+
+        return res.status(200).json({
+            status: 200,
+            message: "Question paper approved successfully.",
+            approvedPaper: paper,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error while approving question paper.",
+            error: error.message,
+        });
+    }
+};
+
+
+export const getApprovedQuestionPapers = async (req, res) => {
+    try {
+        const approvedPapers = await QuestionPaper.find({ status: "approved" })
+            .populate("uploadedBy", "fullName email role") // optional: fetch uploader info
+            .sort({ year: -1, month: -1, createdAt: -1 }); // most recent papers first
+
+        return res.status(200).json({
+            status: 200,
+            message: "Approved question papers fetched successfully.",
+            approvedPapers,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Failed to fetch approved question papers.",
             error: error.message,
         });
     }

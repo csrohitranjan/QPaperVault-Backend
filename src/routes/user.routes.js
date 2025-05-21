@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import { registerUser, loginUser, getApprovedQuestionPapers } from "../controllers/user.controller.js";
+import { registerUser, loginUser } from "../controllers/user.controller.js";
 
 
 
@@ -9,7 +9,7 @@ import { registerUser, loginUser, getApprovedQuestionPapers } from "../controlle
 
 router.route("/registerUser").post(registerUser);
 router.route("/loginUser").post(loginUser);
-router.route("/getApprovedQuestionPapers").get(getApprovedQuestionPapers);
+
 
 
 export default router;

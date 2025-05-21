@@ -2,7 +2,6 @@ import { User } from "../models/user.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 import { generateAccessTokens } from "../utils/generateAccessTokens.js"
-import { QuestionPaper } from "../models/questionPaper.model.js";
 
 
 const registerUser = async (req, res) => {
@@ -134,28 +133,8 @@ const loginUser = async (req, res) => {
 };
 
 
-const getApprovedQuestionPapers = async (req, res) => {
-    try {
-        const approvedPapers = await QuestionPaper.find({ status: "approved" })
-            .populate("uploadedBy", "fullName email role") // optional: fetch uploader info
-            .sort({ year: -1, month: -1, createdAt: -1 }); // most recent papers first
-
-        return res.status(200).json({
-            status: 200,
-            message: "Approved question papers fetched successfully.",
-            approvedPapers,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            status: 500,
-            message: "Failed to fetch approved question papers.",
-            error: error.message,
-        });
-    }
-};
 
 
 
 
-
-export { registerUser, loginUser, getApprovedQuestionPapers }
+export { registerUser, loginUser }
