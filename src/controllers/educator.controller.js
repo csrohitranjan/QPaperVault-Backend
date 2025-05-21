@@ -43,8 +43,8 @@ export const uploadQuestionPaper = async (req, res) => {
             status: isEducator ? "approved" : "pending",
         });
 
-        return res.status(201).json({
-            status: 201,
+        return res.status(200).json({
+            status: 200,
             message: "Question paper uploaded successfully.",
             uploadedPaper,
         });
