@@ -83,6 +83,7 @@ export const approveQuestionPaper = async (req, res) => {
     try {
         const user = req.user;
         const { questionPaperId } = req.params;
+        const { remark } = req.body; // optional remark on approval
 
         if (!questionPaperId) {
             return res.status(400).json({
@@ -109,6 +110,7 @@ export const approveQuestionPaper = async (req, res) => {
 
         paper.status = "approved";
         paper.approvedBy = user._id;
+        paper.remark = remark ? remark.trim() : ""; // clear remark or set if provided
 
         await paper.save();
 
@@ -122,6 +124,64 @@ export const approveQuestionPaper = async (req, res) => {
         return res.status(500).json({
             status: 500,
             message: "Internal Server Error while approving question paper.",
+            error: error.message,
+        });
+    }
+};
+
+
+export const rejectQuestionPaper = async (req, res) => {
+    try {
+        const user = req.user; // admin user from middleware
+        const { questionPaperId } = req.params;
+        const { remark } = req.body;
+
+        if (!questionPaperId) {
+            return res.status(400).json({
+                status: 400,
+                message: "Question paper ID is required.",
+            });
+        }
+
+        if (!remark || remark.trim() === "") {
+            return res.status(400).json({
+                status: 400,
+                message: "Rejection remark is required.",
+            });
+        }
+
+        const paper = await QuestionPaper.findById(questionPaperId);
+
+        if (!paper) {
+            return res.status(404).json({
+                status: 404,
+                message: "Question paper not found.",
+            });
+        }
+
+        if (paper.status !== "pending") {
+            return res.status(400).json({
+                status: 400,
+                message: "This question paper has already been reviewed.",
+            });
+        }
+
+        paper.status = "rejected";
+        paper.remark = remark.trim();
+        paper.approvedBy = user._id;
+
+        await paper.save();
+
+        return res.status(200).json({
+            status: 200,
+            message: "Question paper rejected successfully.",
+            rejectedPaper: paper,
+        });
+    } catch (error) {
+        console.error("Error rejecting question paper:", error);
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error while rejecting question paper.",
             error: error.message,
         });
     }
@@ -143,6 +203,32 @@ export const getApprovedQuestionPapers = async (req, res) => {
         return res.status(500).json({
             status: 500,
             message: "Failed to fetch approved question papers.",
+            error: error.message,
+        });
+    }
+};
+
+
+
+export const getUserUploadedQuestionPapers = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const uploadedPapers = await QuestionPaper.find({ uploadedBy: userId })
+            .sort({ createdAt: -1 }) // newest first
+            .select("-__v") // exclude version key if you want
+            .populate("approvedBy", "fullName email role") // optional: info on who approved/rejected
+
+        return res.status(200).json({
+            status: 200,
+            message: "Fetched your uploaded question papers successfully.",
+            uploadedPapers,
+        });
+    } catch (error) {
+        console.error("Error fetching user's uploaded question papers:", error);
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error while fetching uploaded question papers.",
             error: error.message,
         });
     }
