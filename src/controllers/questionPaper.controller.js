@@ -82,7 +82,7 @@ export const getPendingQuestionPapers = async (req, res) => {
 export const approveQuestionPaper = async (req, res) => {
     try {
         const user = req.user;
-        const { id: questionPaperId } = req.params;
+        const { questionPaperId } = req.params;
 
         if (!questionPaperId) {
             return res.status(400).json({

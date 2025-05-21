@@ -8,7 +8,7 @@ const router = Router();
 
 router.post("/uploadQuestionPaper", userAuth, uploadPDFonlocal.single("questionPaper"), uploadQuestionPaper);
 router.get("/getPendingQuestionPapers", userAuth, isAdminAuth, getPendingQuestionPapers);
-router.put('/questionPaper/approve/:questionPaperId', userAuth, isAdminAuth, approveQuestionPaper);
+router.put('/approveQuestionPaper/:questionPaperId', userAuth, isAdminAuth, approveQuestionPaper);
 router.route("/getApprovedQuestionPapers").get(getApprovedQuestionPapers);
 
 
