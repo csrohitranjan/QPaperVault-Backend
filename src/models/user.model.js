@@ -31,9 +31,9 @@ const userSchema = new mongoose.Schema(
         },
         enrollmentNumber: {
             type: String,
-            // required: true,
-            // unique: true,
-            // trim: true,
+            required: true,
+            unique: true,
+            trim: true,
         },
         otp: {
             type: String,

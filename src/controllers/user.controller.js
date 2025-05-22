@@ -6,10 +6,10 @@ import { generateAccessTokens } from "../utils/generateAccessTokens.js"
 
 const registerUser = async (req, res) => {
     try {
-        let { fullName, email, password } = req.body;
+        let { fullName, email, enrollmentNumber, password } = req.body;
 
         // Check if any required field is missing
-        if (!fullName || !email || !password) {
+        if (!fullName || !email || !password || !enrollmentNumber) {
             return res.status(400).json({
                 status: 400,
                 message: "All fields are required."
@@ -19,6 +19,7 @@ const registerUser = async (req, res) => {
         // Clean and format inputs
         fullName = fullName.trim().toUpperCase();
         email = email.replace(/\s+/g, '').toLowerCase();
+        enrollmentNumber = enrollmentNumber.trim().toUpperCase();
 
         // Check if email ends with valid Amity domain
         const amityEmailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)?amity\.edu$/;
@@ -29,7 +30,10 @@ const registerUser = async (req, res) => {
             });
         }
 
-        const existedUser = await User.findOne({ email });
+        const existedUser = await User.findOne({
+            $or: [{ email }, { enrollmentNumber }]
+        });
+
         if (existedUser) {
             return res.status(409).json({
                 status: 409,
@@ -38,7 +42,8 @@ const registerUser = async (req, res) => {
             });
         }
 
-        const insertedUser = await User.create({ fullName, email, password });
+        const insertedUser = await User.create({ fullName, email, enrollmentNumber, password });
+
         const createdUser = await User.findById(insertedUser._id).select("-password");
 
         if (!createdUser) {
