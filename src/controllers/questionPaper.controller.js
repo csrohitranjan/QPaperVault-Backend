@@ -4,6 +4,24 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const uploadQuestionPaper = async (req, res) => {
     try {
+        const user = req.user;
+
+        // Check if the user is banned from uploading
+        if (user.isUploadBanned) {
+            return res.status(403).json({
+                status: 403,
+                message: "You are not allowed to upload question papers. Please contact an administrator."
+            });
+        }
+
+        // Check for required profile fields
+        if (!user.phoneNumber || !user.department || !user.programme) {
+            return res.status(400).json({
+                status: 400,
+                message: "Please update your profile before uploading."
+            });
+        }
+
         const { paperName, paperCode, department, programme, month, year } = req.body;
 
         if (!paperName || !paperCode || !department || !programme || !month || !year || !req.file) {
@@ -12,8 +30,6 @@ export const uploadQuestionPaper = async (req, res) => {
                 message: "All fields are required."
             });
         }
-
-        const user = req.user;
 
         const filePath = req.file.path;
         const fileName = path.parse(req.file.filename).name;

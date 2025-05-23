@@ -27,13 +27,11 @@ const userSchema = new mongoose.Schema(
         },
         department: {
             type: String,
-            // required: true,
-            // trim: true,
+            trim: true,
         },
         programme: {
             type: String,
-            // required: true,
-            // trim: true,
+            trim: true,
         },
         enrollmentNumber: {
             type: String,

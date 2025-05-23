@@ -96,6 +96,15 @@ const loginUser = async (req, res) => {
             });
         }
 
+        // Check if user is blocked
+        if (user.isBlocked) {
+            return res.status(403).json({
+                status: 403,
+                success: false,
+                message: "Your account has been blocked. Please contact admin."
+            });
+        }
+
         const isPasswordValid = await user.isPasswordCorrect(password);
 
         if (!isPasswordValid) {
