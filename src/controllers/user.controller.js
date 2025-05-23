@@ -2,6 +2,8 @@ import { User } from "../models/user.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 import { generateAccessTokens } from "../utils/generateAccessTokens.js"
+import { sendEmail } from "../utils/email.js"
+import jwt from "jsonwebtoken";
 
 
 const registerUser = async (req, res) => {
@@ -325,7 +327,112 @@ const changePassword = async (req, res) => {
 
 
 
+const requestPasswordReset = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                status: 400,
+                message: "Email is required"
+            });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found"
+            });
+        }
+
+        const resetToken = jwt.sign(
+            { userId: user._id },
+            process.env.RESET_PASSWORD_SECRET,
+            { expiresIn: "5m" }
+        );
+
+        const resetUrl = `${process.env.FRONTEND_URL.replace(/^http:/, 'https:')}/reset-password?token=${resetToken}`;
+
+        await sendEmail({
+            to: user.email,
+            subject: "Password Reset Request",
+            html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 5 minute.</p>`,
+        });
+
+        return res.status(200).json({
+            status: 200,
+            message: "Password reset email sent. Please check your inbox."
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Internal server error on requestPasswordReset",
+            error: error.message
+        });
+    }
+};
 
 
 
-export { registerUser, loginUser, updateUserProfile, changePassword }
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword, confirmPassword } = req.body;
+
+        if (!token || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                status: 400,
+                message: "Token, new password, and confirm password are required",
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                status: 400,
+                message: "New password and confirm password do not match",
+            });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET);
+        } catch (err) {
+            return res.status(400).json({
+                status: 400,
+                message: "Invalid or expired token",
+            });
+        }
+
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: "User not found",
+            });
+        }
+
+        // Update password and save (hashing is handled in pre-save hook)
+        user.password = newPassword;
+        await user.save();
+
+        return res.status(200).json({
+            status: 200,
+            message: "Password has been reset successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Internal server error on resetPassword Controller",
+            error: error.message,
+        });
+    }
+};
+
+
+
+
+
+
+export { registerUser, loginUser, updateUserProfile, changePassword, requestPasswordReset, resetPassword }
