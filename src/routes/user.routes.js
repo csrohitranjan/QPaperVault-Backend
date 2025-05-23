@@ -1,14 +1,26 @@
 import { Router } from "express";
 const router = Router();
-import { registerUser, loginUser } from "../controllers/user.controller.js";
+import {
+    registerUser,
+    loginUser,
+    updateUserProfile,
+    changePassword
+} from "../controllers/user.controller.js";
+import { userAuth } from "../middlewares/userAuth.middleware.js";
 
 
 
 
-// ######################   GENERAL ROUTES ############################
+// Registration & Login
+router.post("/registerUser", registerUser);
+router.post("/loginUser", loginUser);
 
-router.route("/registerUser").post(registerUser);
-router.route("/loginUser").post(loginUser);
+// Update User Profile
+router.put("/updateUserProfile", userAuth, updateUserProfile);
+
+// Change Password
+router.put("/changePassword", userAuth, changePassword);
+
 
 
 

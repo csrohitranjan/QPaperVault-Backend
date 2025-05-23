@@ -15,10 +15,11 @@ const userSchema = new mongoose.Schema(
             unique: true,
             lowercase: true,
         },
-        mobileNumber: {
+        phoneNumber: {
             type: String,
-            // required: true,
             unique: true,
+            sparse: true, // optional but helps with null values being allowed
+            default: null,
         },
         password: {
             type: String,
