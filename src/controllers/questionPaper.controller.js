@@ -1,5 +1,5 @@
 import path from "path";
-import { QuestionPaper } from "../models/questionPaper.model.js";
+import { QuestionPaper } from "../models/questionpaper.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const uploadQuestionPaper = async (req, res) => {
