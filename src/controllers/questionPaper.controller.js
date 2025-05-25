@@ -77,7 +77,7 @@ export const uploadQuestionPaper = async (req, res) => {
 export const getPendingQuestionPapers = async (req, res) => {
     try {
         const pendingPapers = await QuestionPaper.find({ status: "pending" })
-            .populate("uploadedBy", "fullName email role")
+            .populate("uploadedBy", "fullName enrollmentNumber email role")
             .sort({ createdAt: 1 }); // ascending: oldest first
 
         return res.status(200).json({
