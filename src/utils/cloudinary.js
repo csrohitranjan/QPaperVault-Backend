@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 import { v2 as cloudinary } from 'cloudinary';
 import fs from "fs";
-
-
 dotenv.config();
 
 
@@ -19,7 +17,7 @@ const uploadOnCloudinary = async (pdfFilePath, originalFilename) => {
   try {
     const response = await cloudinary.uploader.upload(pdfFilePath, {
       resource_type: 'auto',
-      public_id: `questionpapers/${originalFilename}`, // Save inside 'questionpapers' folder in the Cloudinary.
+      public_id: `${process.env.CLOUDINARY_FOLDER_NAME}/${process.env.CLOUDINARY_SUBFOLDER_NAME}/${originalFilename}`, // Save inside folder in the Cloudinary.
     });
     return response;
   } catch (error) {

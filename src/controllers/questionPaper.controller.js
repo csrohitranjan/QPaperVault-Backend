@@ -1,8 +1,10 @@
 import path from "path";
 import { QuestionPaper } from "../models/questionpaper.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import fs from "fs";
 
 export const uploadQuestionPaper = async (req, res) => {
+    const filePath = req.file.path;
     try {
         const user = req.user;
 
@@ -31,7 +33,6 @@ export const uploadQuestionPaper = async (req, res) => {
             });
         }
 
-        const filePath = req.file.path;
         const fileName = path.parse(req.file.filename).name;
         const uploadResult = await uploadOnCloudinary(filePath, fileName);
 
@@ -70,6 +71,15 @@ export const uploadQuestionPaper = async (req, res) => {
             message: "Internal Server Error while uploading question paper.",
             error: error.message
         });
+    } finally {
+        if (req.file?.path && fs.existsSync(req.file.path)) {
+            try {
+                fs.unlinkSync(req.file.path);
+                console.log("Local file deleted after upload attempt.");
+            } catch (err) {
+                console.log("Failed to delete local file:", err.message);
+            }
+        }
     }
 };
 
