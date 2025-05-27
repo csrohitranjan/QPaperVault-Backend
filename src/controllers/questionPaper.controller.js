@@ -1,6 +1,7 @@
 import path from "path";
 import { QuestionPaper } from "../models/questionpaper.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { formatPaperName, formatMonth } from "../utils/formatUtils.js";
 import fs from "fs";
 
 export const uploadQuestionPaper = async (req, res) => {
@@ -24,12 +25,36 @@ export const uploadQuestionPaper = async (req, res) => {
             });
         }
 
-        const { paperName, paperCode, department, programme, month, year } = req.body;
+        let { paperName, paperCode, department, programme, month, year } = req.body;
 
         if (!paperName || !paperCode || !department || !programme || !month || !year || !req.file) {
             return res.status(400).json({
                 status: 400,
                 message: "All fields are required."
+            });
+        }
+
+        // Cleaning all data befor saving to the DB.
+
+        paperName = formatPaperName(paperName);
+        month = formatMonth(month);
+        paperCode = paperCode.replace(/\s+/g, '').toUpperCase();
+        department = department.replace(/\s+/g, '').toUpperCase();
+        programme = programme.replace(/\s+/g, '').toUpperCase();
+
+        // Checking is this Question paper already available.
+        const existingPaper = await QuestionPaper.findOne({
+            paperCode,
+            department,
+            programme,
+            month,
+            year,
+        });
+
+        if (existingPaper) {
+            return res.status(409).json({
+                status: 409,
+                message: "This question paper already exists in the system.",
             });
         }
 
