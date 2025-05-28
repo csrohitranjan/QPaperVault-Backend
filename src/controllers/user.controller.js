@@ -24,7 +24,6 @@ const requestRegistration = async (req, res) => {
         email = email.replace(/\s+/g, '').toLowerCase();
         enrollmentNumber = enrollmentNumber.trim().toUpperCase();
 
-        /*
         //Check for valid Amity email
         const amityEmailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)?amity\.edu$/;
         if (!amityEmailRegex.test(email)) {
@@ -34,7 +33,6 @@ const requestRegistration = async (req, res) => {
                 message: "Please use a valid Amity email address."
             });
         }
-        */
 
         // Check for existing user
         const existingUser = await User.findOne({
@@ -53,22 +51,39 @@ const requestRegistration = async (req, res) => {
         const token = jwt.sign(
             { fullName, email, enrollmentNumber, password },
             process.env.REGISTRATION_TOKEN_SECRET,
-            { expiresIn: "15m" }
+            { expiresIn: "5m" }
         );
 
         // Prepare verification link
-        const verifyLink = `${process.env.FRONTEND_URL}/verify-registration?token=${token}`;
+        const verifyLink = `${process.env.FRONTEND_URL}/confirm-registration?token=${token}`;
 
         // Send email
         await sendEmail({
             to: email,
             subject: "Complete Your Registration",
             html: `
-                <p>Hi ${fullName},</p>
-                <p>Click the link below to complete your registration:</p>
-                <a href="${verifyLink}">Verify Account</a>
-                <p>This link is valid for 15 minutes.</p>
-            `
+    <div style="max-width: 480px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #444;">
+      <div style="background: linear-gradient(135deg, #0a66c2, #004182); padding: 24px; text-align: center; color: #fff; font-weight: 600; font-size: 22px;">
+        Complete Your Registration
+      </div>
+      <div style="padding: 24px; font-size: 14px; line-height: 1.5;">
+        <p>Hello ${fullName},</p>
+        <p>Please activate your account by clicking the button below. This link expires in 5 minutes.</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${verifyLink}" target="_blank" style="background: linear-gradient(90deg, #0a66c2, #004182); color: #fff; padding: 12px 26px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+            Activate Account
+          </a>
+        </div>
+        <p>If you didn’t request this, ignore this email.</p>
+      </div>
+      <div style="background-color: #e1e4e8; padding: 14px; text-align: center; font-size: 12px; color: #555555; line-height: 1.2;">
+        Designed and developed by Mr. Rohit Ranjan
+        <a href="https://www.linkedin.com/in/csrohitranjan" target="_blank" rel="noopener noreferrer" style="display: inline-block; vertical-align: middle; margin-left: 6px;">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" style="width: 12px; height: 12px; opacity: 0.7; vertical-align: middle;" />
+        </a>
+      </div>
+    </div>
+  `
         });
 
         return res.status(200).json({
