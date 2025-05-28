@@ -6,69 +6,167 @@ import { sendEmail } from "../utils/email.js"
 import jwt from "jsonwebtoken";
 
 
-const registerUser = async (req, res) => {
+const requestRegistration = async (req, res) => {
     try {
         let { fullName, email, enrollmentNumber, password } = req.body;
 
-        // Check if any required field is missing
+        // Validate required fields
         if (!fullName || !email || !password || !enrollmentNumber) {
             return res.status(400).json({
                 status: 400,
+                success: false,
                 message: "All fields are required."
             });
         }
 
-        // Clean and format inputs
+        // Sanitize and format inputs
         fullName = fullName.trim().toUpperCase();
         email = email.replace(/\s+/g, '').toLowerCase();
         enrollmentNumber = enrollmentNumber.trim().toUpperCase();
 
-        // Check if email ends with valid Amity domain
+        /*
+        //Check for valid Amity email
         const amityEmailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)?amity\.edu$/;
         if (!amityEmailRegex.test(email)) {
             return res.status(400).json({
                 status: 400,
-                message: "Use a valid Amity email address for registration."
+                success: false,
+                message: "Please use a valid Amity email address."
             });
         }
+        */
 
-        const existedUser = await User.findOne({
+        // Check for existing user
+        const existingUser = await User.findOne({
             $or: [{ email }, { enrollmentNumber }]
         });
 
-        if (existedUser) {
+        if (existingUser) {
             return res.status(409).json({
                 status: 409,
                 success: false,
-                message: "User already Registered"
+                message: "User already registered."
             });
         }
 
-        const insertedUser = await User.create({ fullName, email, enrollmentNumber, password });
+        // Generate a verification token
+        const token = jwt.sign(
+            { fullName, email, enrollmentNumber, password },
+            process.env.REGISTRATION_TOKEN_SECRET,
+            { expiresIn: "15m" }
+        );
 
-        const createdUser = await User.findById(insertedUser._id).select("-password");
+        // Prepare verification link
+        const verifyLink = `${process.env.FRONTEND_URL}/verify-registration?token=${token}`;
 
-        if (!createdUser) {
-            return res.status(500).json({
-                status: 500,
-                success: false,
-                message: "Something went wrong while registering the user"
-            });
-        }
+        // Send email
+        await sendEmail({
+            to: email,
+            subject: "Complete Your Registration",
+            html: `
+                <p>Hi ${fullName},</p>
+                <p>Click the link below to complete your registration:</p>
+                <a href="${verifyLink}">Verify Account</a>
+                <p>This link is valid for 15 minutes.</p>
+            `
+        });
 
         return res.status(200).json({
             status: 200,
             success: true,
-            message: "User Registered Successfully",
+            message: "Verification email sent. Please check your inbox."
+        });
+
+    } catch (error) {
+        console.error("Error in requestRegistration:", error);
+        return res.status(500).json({
+            status: 500,
+            success: false,
+            message: "Internal server error on requestRegistration Controller",
+            error: error.message
+        });
+    }
+};
+
+
+const confirmRegistration = async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        if (!token) {
+            return res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Verification token is missing."
+            });
+        }
+
+        // Verify token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.REGISTRATION_TOKEN_SECRET);
+        } catch (err) {
+            if (err.name === "TokenExpiredError") {
+                return res.status(401).json({
+                    status: 401,
+                    success: false,
+                    message: "Verification link has expired. Please request registration again."
+                });
+            }
+            if (err.name === "JsonWebTokenError") {
+                return res.status(400).json({
+                    status: 400,
+                    success: false,
+                    message: "Invalid verification token."
+                });
+            }
+
+            // Generic token error
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: "Token verification failed.",
+                error: err.message
+            });
+        }
+
+        const { fullName, email, enrollmentNumber, password } = decoded;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({
+            $or: [{ email }, { enrollmentNumber }]
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                status: 409,
+                success: false,
+                message: "User is already registered and the account is active."
+            });
+        }
+
+        // Create new user
+        const newUser = await User.create({
+            fullName,
+            email,
+            enrollmentNumber,
+            password
+        });
+
+        const createdUser = await User.findById(newUser._id).select("-password");
+
+        return res.status(201).json({
+            status: 201,
+            success: true,
+            message: "Registration successful and account is now active.",
             user: createdUser
         });
 
     } catch (error) {
-        console.log(error)
         return res.status(500).json({
             status: 500,
             success: false,
-            message: "Internal Server Error on: registerUser Controller",
+            message: "Internal server error on confirmRegistration Controller",
             error: error.message
         });
     }
@@ -444,4 +542,4 @@ const resetPassword = async (req, res) => {
 
 
 
-export { registerUser, loginUser, updateUserProfile, changePassword, requestPasswordReset, resetPassword }
+export { requestRegistration, confirmRegistration, loginUser, updateUserProfile, changePassword, requestPasswordReset, resetPassword }

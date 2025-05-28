@@ -1,7 +1,8 @@
 import { Router } from "express";
 const router = Router();
 import {
-    registerUser,
+    requestRegistration,
+    confirmRegistration,
     loginUser,
     updateUserProfile,
     changePassword,
@@ -13,8 +14,11 @@ import { userAuth } from "../middlewares/userAuth.middleware.js";
 
 
 
-// Registration & Login
-router.post("/registerUser", registerUser);
+// Two-Step Registration
+router.post("/requestRegistration", requestRegistration);
+router.get("/confirmRegistration", confirmRegistration);
+
+// Login
 router.post("/loginUser", loginUser);
 
 // Update User Profile
