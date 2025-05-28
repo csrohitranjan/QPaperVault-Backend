@@ -163,7 +163,6 @@ const updateUserProfile = async (req, res) => {
         }
 
         const user = await User.findById(userId);
-
         if (!user) {
             return res.status(404).json({
                 status: 404,
@@ -176,6 +175,15 @@ const updateUserProfile = async (req, res) => {
 
         // Handle phoneNumber update
         if (phoneNumber) {
+            const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                return res.status(400).json({
+                    status: 400,
+                    success: false,
+                    message: "Invalid phone number.",
+                });
+            }
+
             const existingPhoneUser = await User.findOne({ phoneNumber });
             if (existingPhoneUser) {
                 return res.status(409).json({
@@ -184,6 +192,7 @@ const updateUserProfile = async (req, res) => {
                     message: "Phone number already in use.",
                 });
             }
+
             updates.phoneNumber = phoneNumber;
         }
 
