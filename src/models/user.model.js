@@ -14,12 +14,20 @@ const userSchema = new mongoose.Schema(
             required: true,
             unique: true,
             lowercase: true,
+            trim: true,
+            match: [
+                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                "Please enter a valid email address"
+            ]
         },
         phoneNumber: {
             type: String,
             unique: true,
             sparse: true, // optional but helps with null values being allowed
-            default: null,
+            match: [
+                /^\+?[1-9]\d{1,14}$/,
+                "Please enter a valid phone number"
+            ]
         },
         password: {
             type: String,
@@ -27,11 +35,9 @@ const userSchema = new mongoose.Schema(
         },
         department: {
             type: String,
-            trim: true,
         },
         programme: {
             type: String,
-            trim: true,
         },
         enrollmentNumber: {
             type: String,
@@ -41,18 +47,20 @@ const userSchema = new mongoose.Schema(
         },
         otp: {
             type: String,
-            default: null,
         },
         isBlocked: {
             type: Boolean,
+            required: true,
             default: false, // blocks login
         },
         isUploadBanned: {
             type: Boolean,
+            required: true,
             default: false, // blocks uploading papers
         },
         role: {
             type: String,
+            required: true,
             enum: ["student", "educator", "admin"],
             default: "student",
         },
