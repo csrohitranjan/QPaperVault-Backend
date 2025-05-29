@@ -61,29 +61,38 @@ const requestRegistration = async (req, res) => {
         await sendEmail({
             to: email,
             subject: "Complete Your Registration",
-            html: `
-    <div style="max-width: 480px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #444;">
-      <div style="background: linear-gradient(135deg, #0a66c2, #004182); padding: 24px; text-align: center; color: #fff; font-weight: 600; font-size: 22px;">
-        Complete Your Registration
-      </div>
-      <div style="padding: 24px; font-size: 14px; line-height: 1.5;">
-        <p>Hello ${fullName},</p>
-        <p>Please activate your account by clicking the button below. This link expires in 5 minutes.</p>
-        <div style="text-align: center; margin: 20px 0;">
-          <a href="${verifyLink}" target="_blank" style="background: linear-gradient(90deg, #0a66c2, #004182); color: #fff; padding: 12px 26px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
-            Activate Account
-          </a>
-        </div>
-        <p>If you didn’t request this, ignore this email.</p>
-      </div>
-      <div style="background-color: #e1e4e8; padding: 14px; text-align: center; font-size: 12px; color: #555555; line-height: 1.2;">
-        Designed and developed by Mr. Rohit Ranjan
-        <a href="https://www.linkedin.com/in/csrohitranjan" target="_blank" rel="noopener noreferrer" style="display: inline-block; vertical-align: middle; margin-left: 6px;">
-          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" style="width: 12px; height: 12px; opacity: 0.7; vertical-align: middle;" />
-        </a>
-      </div>
+            html: `<div style="max-width: 480px; margin: 30px auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #333333;">
+  <!-- Header -->
+  <div style="background-color: #0a66c2; padding: 24px; text-align: center; color: #ffffff; font-weight: 600; font-size: 22px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+    Complete Your Registration
+  </div>
+
+  <!-- Body -->
+  <div style="padding: 24px; font-size: 14px; line-height: 1.6;">
+    <p style="margin: 0 0 12px;">Hi <strong>${fullName}</strong>,</p>
+    <p style="margin: 0 0 16px;">Please activate your account by clicking the button below. This link will expire in 5 minutes for your security.</p>
+
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${verifyLink}" target="_blank"
+         style="background-color: #0a66c2; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">
+        Activate Account
+      </a>
     </div>
-  `
+
+    <p style="margin: 0;">If you didn’t request this, you can safely ignore this email.</p>
+  </div>
+
+  <!-- Footer -->
+  <div style="background-color: #e1e4e8; padding: 14px; text-align: center; font-size: 12px; color: #555555; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+    Designed and developed by Mr. Rohit Ranjan
+    <a href="https://www.linkedin.com/in/csrohitranjan" target="_blank" rel="noopener noreferrer"
+       style="display: inline-block; vertical-align: middle; margin-left: 6px;">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn"
+           style="width: 12px; height: 12px; opacity: 0.7; vertical-align: middle;" />
+    </a>
+  </div>
+</div>
+`
         });
 
         return res.status(200).json({
@@ -480,29 +489,35 @@ const requestPasswordReset = async (req, res) => {
         await sendEmail({
             to: user.email,
             subject: "Password Reset Request",
-            html: `
-                    <div style="max-width: 480px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); font-family: Arial, sans-serif; color: #444;">
-  <div style="background: linear-gradient(135deg, #c0392b, #922b21); padding: 24px; text-align: center; color: #fff; font-weight: 600; font-size: 22px;">
+            html: `<div style="max-width: 480px; margin: 30px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: Arial, sans-serif; color: #333;">
+  <!-- Header -->
+  <div style="background-color: #b02a1f; padding: 20px; text-align: center; color: #ffffff; font-size: 20px; font-weight: bold; border-top-left-radius: 8px; border-top-right-radius: 8px;">
     Password Reset Request
   </div>
-  <div style="padding: 24px; font-size: 14px; line-height: 1.5;">
-    <p>Hello ${user.fullName},</p>
-    <p>We received a request to reset your password. Click the button below to proceed. This link expires in 5 minutes.</p>
-    <div style="text-align: center; margin: 20px 0;">
-      <a href="${resetUrl}" target="_blank" style="background: linear-gradient(90deg, #c0392b, #922b21); color: #fff; padding: 12px 26px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+
+  <!-- Body -->
+  <div style="padding: 24px; font-size: 14px; line-height: 1.6;">
+    <p style="margin: 0 0 12px;">Hi <strong>${user.fullName}</strong>,</p>
+    <p style="margin: 0 0 12px;">We received a request to reset your password. Click the button below to reset it. This link will expire in 5 minutes for your security.</p>
+    
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${resetUrl}" target="_blank" style="background-color: #b02a1f; color: #ffffff; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 14px;">
         Reset Password
       </a>
     </div>
-    <p>If you didn’t request this, please ignore this email.</p>
+
+    <p style="margin: 0;">If you didn’t request a password reset, you can safely ignore this email.</p>
   </div>
-  <div style="background-color: #000; padding: 8px 14px; text-align: center; font-size: 12px; color: #fff; line-height: 1.2;">
-    Designed and developed by Mr. Rohit Ranjan
-    <a href="https://www.linkedin.com/in/csrohitranjan" target="_blank" rel="noopener noreferrer" style="display: inline-block; vertical-align: middle; margin-left: 6px;">
-      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" style="width: 12px; height: 12px; opacity: 0.8; vertical-align: middle;" />
+
+  <!-- Footer -->
+  <div style="background-color: #1a1a1a; padding: 12px; text-align: center; font-size: 12px; color: #cccccc; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+    Designed & developed by Mr. Rohit Ranjan
+    <a href="https://www.linkedin.com/in/csrohitranjan" target="_blank" rel="noopener noreferrer" style="margin-left: 6px; display: inline-block;">
+      <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" style="width: 14px; height: 14px; vertical-align: middle; opacity: 0.7;" />
     </a>
   </div>
-</div>            
-            `,
+</div>
+`,
         });
 
         return res.status(200).json({
