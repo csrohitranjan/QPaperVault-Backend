@@ -242,7 +242,7 @@ export const rejectQuestionPaper = async (req, res) => {
 export const getApprovedQuestionPapers = async (req, res) => {
     try {
         const approvedPapers = await QuestionPaper.find({ status: "approved" })
-            .populate("uploadedBy", "fullName email role") // optional: fetch uploader info
+            .populate("uploadedBy", "fullName -_id") // optional: fetch uploader info only fullName, exclude _id
             .sort({ year: -1, month: -1, createdAt: -1 }); // most recent papers first
 
         return res.status(200).json({
