@@ -243,8 +243,9 @@ export const getApprovedQuestionPapers = async (req, res) => {
     try {
         const approvedPapers = await QuestionPaper.find({ status: "approved" })
             .populate("uploadedBy", "fullName -_id") // optional: fetch uploader info only fullName, exclude _id
-            .sort({ year: -1, month: -1, createdAt: -1 }); // most recent papers first
-
+            .select("-approvedBy -status -remark -createdAt -updatedAt -__v")
+            .sort({ year: -1, month: -1, createdAt: -1 }) // most recent papers first
+            .lean();
         return res.status(200).json({
             status: 200,
             message: "Approved question papers fetched successfully.",
