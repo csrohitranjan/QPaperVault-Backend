@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     uploadQuestionPaper,
+    downloadQuestionPaper,
     getPendingQuestionPapers,
     getApprovedQuestionPapers,
     approveQuestionPaper,
@@ -15,6 +16,7 @@ import uploadPDFonlocal from '../middlewares/multer.middleware.js';
 const router = Router();
 
 router.post("/uploadQuestionPaper", userAuth, uploadPDFonlocal.single("questionPaper"), uploadQuestionPaper);
+router.get('/downloadQuestionPaper/:questionPaperId', downloadQuestionPaper);
 router.get("/getPendingQuestionPapers", userAuth, isAdminAuth, getPendingQuestionPapers);
 router.put('/approveQuestionPaper/:questionPaperId', userAuth, isAdminAuth, approveQuestionPaper);
 router.route("/getApprovedQuestionPapers").get(getApprovedQuestionPapers);

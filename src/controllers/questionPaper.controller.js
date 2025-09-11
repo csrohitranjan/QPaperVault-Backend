@@ -1,8 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
 import path from "path";
 import { QuestionPaper } from "../models/questionpaper.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import cloudinary from '../utils/cloudinary.js';
+import { uploadOnCloudinary } from "../utils/uploadHelper.js";
 import { formatPaperName, formatMonth } from "../utils/formatUtils.js";
 import fs from "fs";
+
 
 export const uploadQuestionPaper = async (req, res) => {
     const filePath = req.file.path;
@@ -78,7 +82,7 @@ export const uploadQuestionPaper = async (req, res) => {
             programme,
             month,
             year,
-            fileUrl: uploadResult.secure_url,
+            cloudinaryPublicId: uploadResult.public_id,
             uploadedBy: user._id,
             approvedBy: isAuthorizedUser ? user._id : null,
             status: isAuthorizedUser ? "approved" : "pending",
@@ -105,6 +109,44 @@ export const uploadQuestionPaper = async (req, res) => {
                 console.log("Failed to delete local file:", err.message);
             }
         }
+    }
+};
+
+
+export const downloadQuestionPaper = async (req, res) => {
+    try {
+        const { questionPaperId } = req.params;
+
+        const paper = await QuestionPaper.findById(questionPaperId);
+        if (!paper) {
+            return res.status(404).json({
+                message: "Question paper not found"
+            });
+        }
+
+        // Generate signed URL (expires in 5 minutes)
+        const signedUrl = cloudinary.utils.private_download_url(
+            paper.cloudinaryPublicId,
+            process.env.CLOUDINARY_API_SECRET,
+            {
+                resource_type: 'raw',
+                type: 'private',
+                expires_at: Math.floor(Date.now() / 1000) + 300, // 5 min
+            }
+        );
+
+        // Return the signed URL
+        return res.status(200).json({
+            message: "Download URL generated successfully",
+            url: signedUrl
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
     }
 };
 
