@@ -10,6 +10,7 @@ export const uploadOnCloudinary = async (pdfFilePath, originalFilename) => {
             type: 'private',
             public_id: `${process.env.CLOUDINARY_FOLDER_NAME}/${process.env.CLOUDINARY_SUBFOLDER_NAME}/${originalFilename}`, // Save inside folder in the Cloudinary.
         });
+        console.log(response)
         return response;
     } catch (error) {
         console.log("File Upload Failed on Cloudinary:", error);

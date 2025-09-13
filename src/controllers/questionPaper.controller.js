@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
 dotenv.config();
 import path from "path";
+import axios from 'axios';
 import { QuestionPaper } from "../models/questionpaper.model.js";
 import cloudinary from '../utils/cloudinary.js';
 import { uploadOnCloudinary } from "../utils/uploadHelper.js";
 import { formatPaperName, formatMonth } from "../utils/formatUtils.js";
 import fs from "fs";
+import { getWatermarkedPdf } from '../utils/pdfWatermarkHelper.js';
 
 
 export const uploadQuestionPaper = async (req, res) => {
@@ -135,20 +137,66 @@ export const downloadQuestionPaper = async (req, res) => {
             }
         );
 
-        // Return the signed URL
-        return res.status(200).json({
-            message: "Download URL generated successfully",
-            url: signedUrl
-        });
+        const response = await axios.get(signedUrl, { responseType: 'arraybuffer' });
+        const originalPdfBuffer = response.data;
+
+        const watermarkedPdfBuffer = await getWatermarkedPdf(originalPdfBuffer);
+
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 100000);
+        const uniquePart = `${timestamp}-${random}`;
+        const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(Buffer.from(watermarkedPdfBuffer));
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            message: "Internal server error",
+        console.error('Error in downloadQuestionPaper:', error);
+        res.status(500).json({
+            message: "Internal server error while downloading question paper.",
             error: error.message
         });
     }
 };
+
+
+export const viewQuestionPaper = async (req, res) => {
+    try {
+        const { questionPaperId } = req.params;
+
+        const paper = await QuestionPaper.findById(questionPaperId);
+        if (!paper) return res.status(404).json({ message: "Question paper not found" });
+
+        const signedUrl = cloudinary.utils.private_download_url(
+            paper.cloudinaryPublicId,
+            process.env.CLOUDINARY_API_SECRET,
+            { resource_type: 'raw', type: 'private', expires_at: Math.floor(Date.now() / 1000) + 300 }
+        );
+
+        const response = await axios.get(signedUrl, { responseType: 'arraybuffer' });
+        const originalPdfBuffer = response.data;
+
+        const watermarkedPdfBuffer = await getWatermarkedPdf(originalPdfBuffer);
+
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 100000);
+        const uniquePart = `${timestamp}-${random}`;
+        const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.send(Buffer.from(watermarkedPdfBuffer));
+
+    } catch (error) {
+        console.error('Error in viewQuestionPaper:', error);
+        res.status(500).json({
+            message: "Internal server error while viewing question paper.",
+            error: error.message
+        });
+    }
+};
+
 
 
 export const getPendingQuestionPapers = async (req, res) => {
