@@ -142,13 +142,17 @@ export const downloadQuestionPaper = async (req, res) => {
 
         const watermarkedPdfBuffer = await getWatermarkedPdf(originalPdfBuffer);
 
-        const timestamp = Date.now();
-        const random = Math.floor(Math.random() * 100000);
-        const uniquePart = `${timestamp}-${random}`;
-        const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
+        const fileName = paper.cloudinaryPublicId.split("/").pop();
+        console.log(fileName);
+
+
+        // const timestamp = Date.now();
+        // const random = Math.floor(Math.random() * 100000);
+        // const uniquePart = `${timestamp}-${random}`;
+        // const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.send(Buffer.from(watermarkedPdfBuffer));
 
     } catch (error) {
@@ -179,13 +183,16 @@ export const viewQuestionPaper = async (req, res) => {
 
         const watermarkedPdfBuffer = await getWatermarkedPdf(originalPdfBuffer);
 
-        const timestamp = Date.now();
-        const random = Math.floor(Math.random() * 100000);
-        const uniquePart = `${timestamp}-${random}`;
-        const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
+        const fileName = paper.cloudinaryPublicId.split("/").pop();
+        console.log(fileName);
+
+        // const timestamp = Date.now();
+        // const random = Math.floor(Math.random() * 100000);
+        // const uniquePart = `${timestamp}-${random}`;
+        // const filename = `${paper.paperCode}-${paper.month}-${paper.year}-${uniquePart}_QPaperVault.pdf`;
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
         res.send(Buffer.from(watermarkedPdfBuffer));
 
     } catch (error) {
