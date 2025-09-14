@@ -31,6 +31,10 @@ const questionPaperSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        fileUrl: {
+            type: String,
+            required: true,
+        },
         cloudinaryPublicId: {
             type: String,
             required: true,

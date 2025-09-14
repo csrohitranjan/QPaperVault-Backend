@@ -85,6 +85,7 @@ export const uploadQuestionPaper = async (req, res) => {
             month,
             year,
             cloudinaryPublicId: uploadResult.public_id,
+            fileUrl: uploadResult.secure_url,
             uploadedBy: user._id,
             approvedBy: isAuthorizedUser ? user._id : null,
             status: isAuthorizedUser ? "approved" : "pending",
