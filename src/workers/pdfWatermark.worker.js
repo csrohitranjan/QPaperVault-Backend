@@ -17,7 +17,7 @@ parentPort.on('message', async (data) => {
                 font,
                 color: rgb(0.75, 0.75, 0.75),
                 rotate: degrees(45),
-                opacity: 0.15,
+                opacity: 0.3,
             });
         });
 
