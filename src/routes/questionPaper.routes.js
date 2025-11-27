@@ -23,7 +23,7 @@ router.get('/downloadQuestionPaper/:questionPaperId', downloadQuestionPaper);
 router.get('/viewQuestionPaper/:questionPaperId', viewQuestionPaper);
 router.get("/getPendingQuestionPapers", userAuth, isAdminAuth, getPendingQuestionPapers);
 router.put('/approveQuestionPaper/:questionPaperId', userAuth, isAdminAuth, approveQuestionPaper);
-router.route("/getApprovedQuestionPapers").get(getApprovedQuestionPapers);
+router.get("/getApprovedQuestionPapers", userAuth, getApprovedQuestionPapers);
 router.put("/rejectQuestionPaper/:questionPaperId", userAuth, isAdminAuth, rejectQuestionPaper);
 router.get("/getUserUploadedQuestionPapers", userAuth, getUserUploadedQuestionPapers);
 
