@@ -64,4 +64,17 @@ const questionPaperSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+questionPaperSchema.pre("save", function (next) {
+    if (this.paperCode) {
+        this.paperCode = this.paperCode.replace(/\s+/g, "").toUpperCase();
+    }
+    if (this.department) {
+        this.department = this.department.replace(/\s+/g, "").toUpperCase();
+    }
+    if (this.programme) {
+        this.programme = this.programme.replace(/\s+/g, "").toUpperCase();
+    }
+    next();
+});
+
 export const QuestionPaper = mongoose.model("QuestionPaper", questionPaperSchema);
